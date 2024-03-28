@@ -1,4 +1,4 @@
-import { MeshBuilder, SceneLoader, Vector3 } from "@babylonjs/core";
+import { FollowCamera, MeshBuilder, SceneLoader, Vector3 } from "@babylonjs/core";
 
 import playerMesh  from "../assets/models/player.glb";
 
@@ -6,11 +6,15 @@ const SPEEDX = 10;
 const SPEEDZ = 10;
 const GRAVITY = -9.81;
 var VELOCITY = 0;
+var CAMERA_VECTOR = 0
+
 
 class Player {
   constructor(name) {
     this.name = name;
-    this.playerBox;
+    this.createBox();
+    this.camera;
+
     this.player;
     this.inputMap = {};
     this.actions = {};
@@ -79,7 +83,9 @@ class Player {
 
 
     else if(this.inputMap['KeyW']){
-      VELOCITY += this.angleList[numeroPlatform] *  0.3;
+      if (VELOCITY < 1){
+        VELOCITY += this.angleList[numeroPlatform] *  0.3;
+      }
       let newPosition =  new Vector3(0, -VELOCITY, -SPEEDZ * delta);
       this.playerBox.moveWithCollisions(newPosition);
       this.player.position = this.playerBox.position;
@@ -121,15 +127,32 @@ class Player {
     else if(this.inputMap['Space']){
       this.player.position.y -= GRAVITY * delta;
       this.playerBox.position.y -= GRAVITY * delta;
-  } else if(this.inputMap['KeyI']){
+  } 
+  
+  else if(this.inputMap['KeyI']){
        // is inspector is displayed hide it otherwise show it
         if(this.scene.debugLayer.isVisible())
           this.scene.debugLayer.hide();
           else this.scene.debugLayer.show();
   }
 
-  else {VELOCITY = 0;}
+  else {
+    VELOCITY = 0;
+  }
  }
+
+ createCamera(scene){
+    this.camera = new FollowCamera("FollowCam", new Vector3(0, 8.5, 8.5), scene);
+    this.camera.radius = 20;
+    this.camera.heightOffset = 0;
+    this.camera.rotationOffset = 0;
+    this.camera.cameraAcceleration = VELOCITY + 0.1;
+    this.camera.maxCameraSpeed = 5;
+   this.camera.setTarget(new Vector3(0, CAMERA_VECTOR, 0));
+    this.camera.attachControl(this.player, true);
+ }
+
 }
+
 
 export default Player;

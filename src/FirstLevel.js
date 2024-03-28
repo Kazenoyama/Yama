@@ -1,6 +1,10 @@
-import { HemisphericLight, MeshBuilder, StandardMaterial, Texture } from "@babylonjs/core";
+import { HemisphericLight, MeshBuilder, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 
 import groundMesh from "../assets/textures/snow.jpg";
+
+const MAXPLATFORM = 50;
+var VELOCITY = 0;
+const SPEED = 10;
 
 class FirstLevel{
     constructor(scene, width, height, depth){
@@ -17,6 +21,11 @@ class FirstLevel{
     }
 
     init(scene){
+        this.createPlatform(scene);
+
+    }
+
+    async createPlatform(scene){
         let platform = MeshBuilder.CreateBox("platform", {width: this.dimension.width, height: this.dimension.height, depth: this.dimension.depth}, scene);
         platform.material = new StandardMaterial("platformMat", scene);
         platform.material.diffuseTexture = new Texture(groundMesh, scene);
@@ -24,27 +33,26 @@ class FirstLevel{
         platform.rotation.x =  -(this.angle);
         platform.checkCollisions = true;
 
-        this.listAngle.push(this.angle);
         this.listPlatform.push(platform);
-
-    }
-
-    async createPlatform(scene){
-        this.angle = Math.PI/4;
-        let platform2 = MeshBuilder.CreateBox("platform2", {width: this.dimension.width, height: this.dimension.height, depth: this.dimension.depth}, scene);
-        platform2.material = new StandardMaterial("platformMat", scene);
-        platform2.material.diffuseTexture = new Texture(groundMesh, scene);
-        platform2.position.y = -(this.findOtherSideLength(this.dimension.width, this.angle)/3 + platform2.scaling.y/2);
-        platform2.position.z = -(this.listPlatform[this.listPlatform.length - 1].position.z + this.dimension.depth -2);
-        platform2.rotation.x = this.angle * -1;
-        platform2.checkCollisions = true;
-
-        this.listPlatform.push(platform2);
         this.listAngle.push(this.angle);
-        console.log(this.listPlatform);
-
 
         return this.listPlatform;
+    }
+
+    createStraightLine(scene){
+        
+        for(var i =0; i < MAXPLATFORM; i++){
+            this.createPlatform(scene);
+        }
+        
+        for(i =0; i  < this.listPlatform.length -1; i++){
+            this.listPlatform[i+1].position.z = this.listPlatform[i].position.z - this.dimension.depth/1.5;
+            this.listPlatform[i+1].position.y = this.listPlatform[i].position.y - this.findOtherSideLength(this.dimension.depth, this.angle) / 3.63;
+            
+        }
+
+        //this.createPlatform(scene);
+        //this.createPlatform(scene);
     }
 
     findOtherSideLength(hypotenuse, angleDegrees) {
@@ -56,6 +64,15 @@ class FirstLevel{
     
         return otherSideLength;
     }
+
+    movePlatform(delta){
+        VELOCITY += this.angle * 0.3;
+        for(var i = 0; i < this.listPlatform.length; i++){
+            this.listPlatform[i].position.z += VELOCITY * delta;
+        }
+    }
+
+    
 
 
 }
