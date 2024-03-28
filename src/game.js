@@ -17,6 +17,7 @@ class Game {
         this.canvas = canvas;
 
         this.player;
+        this.inputMap = {};
     }
 
     init() {
@@ -28,11 +29,15 @@ class Game {
                 switch (kbInfo.type) {
                     case KeyboardEventTypes.KEYDOWN:
                         this.player.inputMap[kbInfo.event.code] = true;
+                        this.inputMap[kbInfo.event.code] = true;
                         break;
                     case KeyboardEventTypes.KEYUP:
                         this.player.inputMap[kbInfo.event.code] = false;
                         this.player.actions[kbInfo.event.code] = true;
                         break;
+                    case KeyboardEventTypes.KEYPRESS:
+                        if(this.input)
+                        this.inputMap[kbInfo.event.code] = true;
                 }
             });
         });
@@ -42,7 +47,15 @@ class Game {
 
     start() {
         this.engine.runRenderLoop(() => {
+
+            if(this.inputMap['KeyT']) this.addInspector();
+
+            this.player.listPlatform = this.firstLevel.listPlatform;
+            this.player.angleList = this.firstLevel.listAngle;
+
             this.player.updateMove(0.01);
+
+            
             if(this.maxPlatform > this.firstLevel.listPlatform.length){
                 this.firstLevel.createPlatform(this.scene);
             }
@@ -100,6 +113,11 @@ class Game {
         // Default intensity is 1. Let's dim the light a small amount
         light.intensity = 0.7;
 
+
+    }
+
+    addInspector() {
+        this.scene.debugLayer.show();
     }
 }
 
