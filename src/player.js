@@ -13,7 +13,6 @@ class Player {
   constructor(name) {
     this.name = name;
     this.createBox();
-    this.camera;
 
     this.player;
     this.inputMap = {};
@@ -142,14 +141,13 @@ class Player {
  }
 
  createCamera(scene){
-    this.camera = new FollowCamera("FollowCam", new Vector3(0, 8.5, 8.5), scene);
-    this.camera.radius = 20;
-    this.camera.heightOffset = 0;
-    this.camera.rotationOffset = 0;
-    this.camera.cameraAcceleration = VELOCITY + 0.1;
-    this.camera.maxCameraSpeed = 5;
-   this.camera.setTarget(new Vector3(0, CAMERA_VECTOR, 0));
-    this.camera.attachControl(this.player, true);
+    const camera = new FollowCamera("FollowCam", new Vector3(0, 8.5, 8.5), scene);
+    camera.lockedTarget = this.playerBox;
+    camera.radius = 15;
+    camera.heightOffset = 8;
+    camera.rotationOffset = 0;    
+
+    return camera;
  }
 
 }
