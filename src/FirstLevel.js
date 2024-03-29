@@ -2,7 +2,7 @@ import { HemisphericLight, MeshBuilder, StandardMaterial, Texture, Vector3 } fro
 
 import groundMesh from "../assets/textures/snow.jpg";
 
-const MAXPLATFORM = 50;
+const MAXPLATFORM = 200;
 var VELOCITY = 0;
 const SPEED = 10;
 

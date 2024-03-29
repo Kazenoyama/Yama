@@ -50,6 +50,7 @@ class Game {
         this.engine.runRenderLoop(() => {
             if(this.activeCamera!= undefined){
                 let delta = this.engine.getDeltaTime() / 1000.0;
+                // delta = 0.016;
                 
                 if(this.inputMap['KeyT']) this.addInspector();
 
@@ -58,7 +59,7 @@ class Game {
 
                 this.player.updateMove(delta);
                 // this.player.updateCamera(); 
-                this.firstLevel.movePlatform(delta);
+                // this.firstLevel.movePlatform(delta);
                 this.scene.render();
             }
         });
@@ -106,10 +107,6 @@ class Game {
         camera2.setTarget(Vector3.Zero());
         camera2.attachControl(this.player, true);
         //this.activeCamera = camera2;
-
-        
-        
-        
     
     }
 
