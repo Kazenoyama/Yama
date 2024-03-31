@@ -1,8 +1,8 @@
 # Yama
-It's a game in BabylonJS for the Games on Web 2024 made by :
-ThePhoenix78 Phoenix / JulienLcq : Julien
-Antoine Bruneau / verix33 : Antoine Bruneau
-Kazenoyama : Kishan Turpin
+It's a game in BabylonJS for the Games on Web 2024 made by :  
+ThePhoenix78 Phoenix / JulienLcq : Julien  
+Antoine Bruneau / verix33 : Antoine Bruneau  
+Kazenoyama : Kishan Turpin  
 
 ## Context:
 The goal of this ski game is to compete against an AI in a race down the mountain.  
