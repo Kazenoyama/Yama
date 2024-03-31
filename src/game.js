@@ -10,6 +10,7 @@ class Game {
     scene;
     maxPlatform = 4;
     firstLevel;
+    activeCamera;
 
 
     constructor(engine, canvas) {
@@ -39,24 +40,28 @@ class Game {
                         this.inputMap[kbInfo.event.code] = true;
                 }
             });
+            this.engine.hideLoadingUI();
         });
-        this.engine.hideLoadingUI();
+        
 
     }
 
     start() {
         this.engine.runRenderLoop(() => {
-            let delta = this.engine.getDeltaTime() / 1000.0;
-            
-            if(this.inputMap['KeyT']) this.addInspector();
+            if(this.activeCamera!= undefined){
+                let delta = this.engine.getDeltaTime() / 1000.0;
+                // delta = 0.016;
+                
+                if(this.inputMap['KeyT']) this.addInspector();
 
-            this.player.platformsList = this.firstLevel.listPlatform;
-            this.player.angleList = this.firstLevel.listAngle;
+                this.player.platformsList = this.firstLevel.listPlatform;
+                this.player.angleList = this.firstLevel.listAngle;
 
-            this.player.updateMove(delta);
-            // this.player.updateCamera(); 
-            this.firstLevel.movePlatform(delta);
-            this.scene.render(this.player.camera);
+                this.player.updateMove(delta);
+                // this.player.updateCamera(); 
+                // this.firstLevel.movePlatform(delta);
+                this.scene.render();
+            }
         });
 
     }
@@ -81,25 +86,26 @@ class Game {
          * Create the player
          */
         this.player = new Player("Player 1");
-        this.player.createCamera(this.scene);
-        this.player.createbody(this.scene);
-        // this.player.createBox();
-        // await this.sleep(500);
-        this.player.camera.attachControl(this.canvas, true);
-        this.scene.activeCamera = this.camera;
-        
+        this.player.createbody(this.scene).then(()=> {
+            const camera = this.player.createCamera(this.scene);
+            this.activeCamera = camera;
+            this.scene.activeCamera = camera;
+            console.log("Camera created");
+        });
+
         /**
          * Create the camera
-
-        const camera = new FreeCamera("camera", new Vector3(0, 8.5, 8.5), this.scene);
-        camera.setTarget(Vector3.Zero());
-        camera.attachControl(this.player, true);
         */
+       
+        const camera2 = new FreeCamera("camera", new Vector3(0, 8.5, 8.5), this.scene);
+        camera2.setTarget(Vector3.Zero());
+        camera2.attachControl(this.canvas, true);
+        //this.activeCamera = camera2;
     
     }
 
     addFirstLevel() {
-        this.firstLevel = new FirstLevel(this.scene, 10, 0.5, 10);
+        this.firstLevel = new FirstLevel(this.scene, 25, 0.5, 10);
         this.firstLevel.createStraightLine(this.scene);
     }
     

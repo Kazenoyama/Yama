@@ -4,16 +4,16 @@ import playerMesh  from "../assets/models/player.glb";
 
 const SPEEDX = 10;
 const SPEEDZ = 10;
-const GRAVITY = -9.81;
+var GRAVITY = 1.0;
 var VELOCITY = 0;
-var CAMERA_VECTOR = 0
+var VELOCITY2 = 0;
+var DIRECTION = 0;
 
 
 class Player {
   constructor(name) {
     this.name = name;
     this.createBox();
-    this.camera;
 
     this.player;
     this.inputMap = {};
@@ -51,105 +51,45 @@ class Player {
         break;
       }
     }
+    if (VELOCITY2 < 7){
+      VELOCITY2 += 0.02;
+    }
+
+    VELOCITY = this.angleList[numeroPlatform] * 1.3 + VELOCITY2;
+
+    DIRECTION = -GRAVITY-VELOCITY2
+
+    let newPosition = new Vector3(0, DIRECTION, 0);
+
 
     if(this.inputMap['KeyD']){
-      // on cree un vecteur pour le déplacement du joueur
-      let newPosition =  new Vector3(-SPEEDX * delta, 0, 0);
-      this.playerBox.moveWithCollisions(newPosition);
-      this.player.position = this.playerBox.position;
+      newPosition = new Vector3(-SPEEDX * delta, DIRECTION, 0);
 
-      /*
-      this.player.position.x -= SPEEDX * delta;
-      this.playerBox.position.x -= SPEEDX * delta;
-      */
-      if(this.player.position.x < -3.75){
-        this.player.position.x = -3.75;
-        this.playerBox.position.x = -3.75;
-      }
     }
     else if(this.inputMap['KeyA']){
-      let newPosition =  new Vector3(SPEEDX * delta, 0, 0);
-      this.playerBox.moveWithCollisions(newPosition);
-      this.player.position = this.playerBox.position;
-      /*
-      this.player.position.x += SPEEDX * delta;
-      this.playerBox.position.x += SPEEDX * delta;
-      */
-      if(this.player.position.x > 3.75){
-        this.player.position.x = 3.75;
-        this.playerBox.position.x = 3.75;
-      }
+      newPosition = new Vector3(SPEEDX * delta, DIRECTION, 0);
+      
     }
+    this.playerBox.moveWithCollisions(newPosition);
+    this.player.position = new Vector3(this.playerBox.position.x, this.playerBox.position.y-1.8/2, this.playerBox.position.z);
 
 
-    else if(this.inputMap['KeyW']){
-      if (VELOCITY < 1){
-        VELOCITY += this.angleList[numeroPlatform] *  0.3;
-      }
-      let newPosition =  new Vector3(0, -VELOCITY, -SPEEDZ * delta);
-      this.playerBox.moveWithCollisions(newPosition);
-      this.player.position = this.playerBox.position;
-      /*
-      this.player.position.z -= SPEEDZ * delta;
-      this.playerBox.position.z -= SPEEDZ * delta;
-      */
-     /*
-      if(this.player.position.z < -3.75){
-        this.player.position.z = -3.75;
-        this.playerBox.position.z = -3.75;
-      }
-      */
-    }
-
-    else if(this.inputMap['KeyS']){
-       let newPosition =  new Vector3(0, 0, SPEEDZ * delta);
-      this.playerBox.moveWithCollisions(newPosition);
-      this.player.position = this.playerBox.position;
-      /*
-      this.player.position.z += SPEEDZ * delta;
-      this.playerBox.position.z += SPEEDZ * delta;
-      */
-      if(this.player.position.z > 3.75){
-        this.player.position.z = 3.75;
-        this.playerBox.position.z = 3.75;
-      }
-    }
-
-    else if(this.inputMap['ControlLeft']){
-      this.player.position.y += GRAVITY * delta;
-      this.playerBox.position.y += GRAVITY * delta;
-      if(this.player.position.y < 0){
-        this.player.position.y = 0;
-        this.playerBox.position.y = 0 + 1.8/2;
-      }
-    }
-
-    else if(this.inputMap['Space']){
-      this.player.position.y -= GRAVITY * delta;
-      this.playerBox.position.y -= GRAVITY * delta;
-  } 
-  
-  else if(this.inputMap['KeyI']){
+  if(this.inputMap['KeyI']){
        // is inspector is displayed hide it otherwise show it
         if(this.scene.debugLayer.isVisible())
           this.scene.debugLayer.hide();
           else this.scene.debugLayer.show();
   }
-
-  else {
-    VELOCITY = 0;
-  }
  }
 
  createCamera(scene){
-    this.camera = new FollowCamera("FollowCam", new Vector3(0, 8.5, 8.5), scene);
-    this.camera.radius = 20;
-    this.camera.heightOffset = 0;
-    this.camera.rotationOffset = 0;
-    this.camera.cameraAcceleration = VELOCITY + 0.1;
-    this.camera.maxCameraSpeed = 5;
-   this.camera.setTarget(new Vector3(0, CAMERA_VECTOR, 0));
-    this.camera.attachControl(this.player, true);
+    const camera = new FollowCamera("FollowCam", new Vector3(0, 8.5, 8.5), scene);
+    camera.lockedTarget = this.playerBox;
+    camera.radius = 15;
+    camera.heightOffset = 8;
+    camera.rotationOffset = 0;    
+
+    return camera;
  }
 
 }
