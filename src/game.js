@@ -92,26 +92,20 @@ class Game {
             this.scene.activeCamera = camera;
             console.log("Camera created");
         });
-        
-        
-        // this.player.createBox();
-        // await this.sleep(500);
-        //this.player.camera.attachControl(this.canvas, true);
-        //this.scene.activeCamera = this.camera;
-        
+
         /**
          * Create the camera
         */
        
         const camera2 = new FreeCamera("camera", new Vector3(0, 8.5, 8.5), this.scene);
         camera2.setTarget(Vector3.Zero());
-        camera2.attachControl(this.player, true);
+        camera2.attachControl(this.canvas, true);
         //this.activeCamera = camera2;
     
     }
 
     addFirstLevel() {
-        this.firstLevel = new FirstLevel(this.scene, 10, 0.5, 10);
+        this.firstLevel = new FirstLevel(this.scene, 25, 0.5, 10);
         this.firstLevel.createStraightLine(this.scene);
     }
     
