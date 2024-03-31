@@ -1,6 +1,6 @@
 # Yama
 It's a game in BabylonJS for the Games on Web 2024 made by :  
-ThePhoenix78 Phoenix / JulienLcq : Julien  
+JulienLcq : Julien  
 Antoine Bruneau / verix33 : Antoine Bruneau  
 Kazenoyama : Kishan Turpin  
 
