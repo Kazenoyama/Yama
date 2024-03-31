@@ -9,6 +9,9 @@ The goal of this ski game is to compete against an AI in a race down the mountai
 We want to change the speed of the race and maneuverability with the different type of snow we will add down the line.
 
 ## What we did:
+
+[<img alt="Image of our UML" src="Yama.png" />]
+
 We begin our project with the help of the video of Olivier Arguimbau "From Scratch" to setup correctly all our library.  
 We then added a player and a first level to have something which can be used to test new idea.  
 
