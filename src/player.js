@@ -2,7 +2,7 @@ import { FollowCamera, MeshBuilder, SceneLoader, Vector3 } from "@babylonjs/core
 
 import playerMesh  from "../assets/models/player.glb";
 
-const SPEEDX = 10;
+const SPEEDX = 30;
 const SPEEDZ = 10;
 var GRAVITY = 1.0;
 var VELOCITY = 0;
@@ -13,7 +13,9 @@ var DIRECTION = 0;
 class Player {
   constructor(name) {
     this.name = name;
+    this.playerBox;
     this.createBox();
+    
 
     this.player;
     this.inputMap = {};

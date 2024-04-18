@@ -1,17 +1,18 @@
-import { HemisphericLight, MeshBuilder, Scene, SceneLoader, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import { ActionManager, ExecuteCodeAction, HemisphericLight, MeshBuilder, Scene, SceneLoader, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 
 import groundMesh from "../assets/textures/snow.jpg";
 import cubeModel from "../assets/models/ice_cube.glb";
-import tree1 from "../assets/models/fur_tree.glb";
-import tree2 from "../assets/models/madrona_invasives.glb";
 
-const MAXPLATFORM = 200;
+import Scenary from "./Scenary.js";
+
+const MAXPLATFORM = 1000;
 var VELOCITY = 0;
 const SPEED = 10;
 const MAXOBSTACLES = 50;
+const MAXTREES = 50;
 
 class FirstLevel{
-    constructor(scene, width, height, depth){
+    constructor(scene, width, height, depth,player){
         this.name = 'FirstLevel';
         this.dimension = {width: width, height: height, depth: depth};
         
@@ -19,39 +20,47 @@ class FirstLevel{
         this.listAngle = [];
         this.listObstacle = [];
         this.obstacle;
-        this.tree;
-        this.treeCouch;
 
         this.angle = Math.PI/8;
-        this.init(scene);
-    }
-    getName(){
-        return this.name;
+        this.init(player,scene);
     }
 
-    init(scene){
+    init(player,scene){
         this.createPlatform(scene);
+        this.Scenary = new Scenary();
+        
         this.LoadObstacle(scene).then(() => {
-            var height, width, depth;
             var platformAttached;
-            var placementX, placementY, placementZ;
+            var placementX;
+
+            var platform;
+            var previousPlatform = [0, 1, 2, 3, 4, 5];
 
             for(var i = 0; i < MAXOBSTACLES; i++){
-                height = Math.random() * 10 + 1;
-                width = Math.random() * 10 + 1;
-                depth =0.5;
+
                 placementX = Math.random() * 10 - 5;
-                platformAttached = this.listPlatform[Math.floor(Math.random() * this.listPlatform.length)];
-                this.createObstacle( width, height, depth, platformAttached, placementX);
+                platform = Math.floor((Math.random() * this.listPlatform.length));
+
+                while (previousPlatform.includes(platform) || platform%2 == 1){
+                    platform = Math.floor(Math.random() * this.listPlatform.length);
+                }
+
+
+                platformAttached = this.listPlatform[platform];
+                this.createFlag(platformAttached, placementX);
+
+                previousPlatform.push(platform);
             }
+            this.checkPassage(player, scene);
                 
         });
-        this.LoadTree(scene).then(() => {
-            for(var i = 0; i < 50; i++){
-                this.addTree();
+        this.Scenary.LoadTree(scene).then(() => {
+            for(var i = 0; i < MAXTREES; i++) {
+                var randomSize = Math.random() * 4 + 2;
+                var randomIndex = Math.floor(Math.random() * this.listPlatform.length);
+                this.Scenary.addTree(this.listPlatform[randomIndex], this.dimension, randomSize );
             }
         });
-
     }
 
     async createPlatform(scene){
@@ -107,51 +116,69 @@ class FirstLevel{
         this.obstacle.meshes[0].isVisible = false;
     }
 
-    async LoadTree(scene){
-        this.tree = await SceneLoader.ImportMeshAsync("", "", tree1, scene);
-        this.tree.meshes[0].scaling = new Vector3(0.5, 0.5, 0.5);
-        this.tree.meshes[0].isVisible = false;
-        this.tree.meshes[0].position.z = 10;
-
-        /*
-        this.treeCouch = await SceneLoader.ImportMeshAsync("", "", tree2, scene);
-        this.treeCouch.meshes[0].scaling = new Vector3(0.1, 0.1, 0.1);
-        this.treeCouch.meshes[0].isVisible = false;
-        this.treeCouch.meshes[0].position.z = 10;*/
-
-    }
-
     createObstacle(width, height, depth, platformAttached, placementX){
         const obstacle = this.obstacle.meshes[0].clone("obstacle");
         obstacle.scaling = new Vector3(width, height, depth);
         obstacle.position = platformAttached.position.clone();
-        obstacle.position.y = platformAttached.position.y ;
+        obstacle.position.y = platformAttached.position.y;
         obstacle.position.z = platformAttached.position.z;
         obstacle.position.x = platformAttached.position.x + placementX;
         obstacle.isVisible = true;
         obstacle.checkCollisions = true;
-        this.listObstacle.push(obstacle);
+        return obstacle;
+        
     }
 
-    addTree(){
-    const platform = this.listPlatform[Math.floor(Math.random() * this.listPlatform.length)];
-    const tree = this.tree.meshes[0].clone("tree");
-    tree.position = platform.position.clone();
-    tree.scaling = new Vector3(3, 3, 3);
-    tree.position.y = platform.position.y;
-    tree.position.z = platform.position.z;
-    if(Math.floor(Math.random() * 2 - 1 ) >=0)
-        tree.position.x = platform.position.x + (this.dimension.width/2 );
-    else
-        tree.position.x = platform.position.x - (this.dimension.width/2);
-    tree.isVisible = true;
-    tree.checkCollisions = false;
+    createFlag(platformAttached, positionX) {
+        const width = this.dimension.width
+
+        const factor = 2.9;
+
+        // hitbox a gauche du drapeay
+        var obg = this.createObstacle(width / 1.5, 5, .5, platformAttached, (width / 2) + positionX - factor);
+
+        // hitbox a droite du drapeau
+        var obd = this.createObstacle(width / 1.5, 5, .5, platformAttached, -((width / 2) - positionX - factor));
+
+        // drapeau
+        var obp = this.createObstacle(1, 7, .5, platformAttached, positionX);
+
+        const color = Math.random();
+
+        if (color > 0.5) {
+            obp.color = 1;
+            obg.pass = true;
+            obd.pass = false
+        }
+        else {
+            obp.color = 0;
+            obg.pass = false;
+            obd.pass = true;
+        }
+
+        
+        this.listObstacle.push({obg, obp, obd});
     }
 
+    checkPassage(player, scene){
+        //console.log(player.playerBox.meshes)
+        for(var obstacle = 0; obstacle < this.listObstacle.length; obstacle++){
+            var obd = this.listObstacle[obstacle].obd;
+            var obg = this.listObstacle[obstacle].obg;
+            var obp = this.listObstacle[obstacle].obp;
 
+            obd.actionManager = new ActionManager(scene);
 
-    
+            /*
+            obd.actionManager.registerAction(
+                new ExecuteCodeAction(
+                    ActionManager.OnIntersectionEnterTrigger, 
+                    player.playerBox, () => {
+                        console.log("You passed the obstacle");
+            }));*/
+        }
 
+    }
 
 }
 

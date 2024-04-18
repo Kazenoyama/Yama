@@ -60,6 +60,10 @@ class Game {
                 this.player.updateMove(delta);
                 // this.player.updateCamera(); 
                 // this.firstLevel.movePlatform(delta);
+
+
+                //this.firstLevel.checkCollisions(this.player);
+
                 this.scene.render();
             }
         });
@@ -77,10 +81,7 @@ class Game {
         this.scene = new Scene(this.engine);
         this.addLight();
 
-        /**
-         * Add Platform to the game
-         */
-        this.addFirstLevel();
+        
 
         /**
          * Create the player
@@ -93,10 +94,15 @@ class Game {
             console.log("Camera created");
         });
 
+
+        /**
+         * Add Platform to the game
+         */
+        this.addFirstLevel();
+
         /**
          * Create the camera
         */
-       
         const camera2 = new FreeCamera("camera", new Vector3(0, 8.5, 8.5), this.scene);
         camera2.setTarget(Vector3.Zero());
         camera2.attachControl(this.canvas, true);
@@ -105,8 +111,11 @@ class Game {
     }
 
     addFirstLevel() {
-        this.firstLevel = new FirstLevel(this.scene, 25, 0.5, 10);
+        //console.log(this.player)
+        this.firstLevel = new FirstLevel(this.scene, 25, 0.5, 10,this.player);
         this.firstLevel.createStraightLine(this.scene);
+
+        //this.firstLevel.checkCollisions(this.player, this.scene);
     }
     
     addLight(){
