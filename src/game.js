@@ -1,143 +1,60 @@
 import { BoundingInfo, Camera, Color3, Color4, DefaultRenderingPipeline, FollowCamera, FreeCamera, HemisphericLight, KeyboardEventTypes, MeshBuilder, MotionBlurPostProcess, Scalar, Scene, SceneLoader, Sound, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
+
 import Player from "./player.js";
 import FirstLevel from "./FirstLevel.js";
+import Scenary from "./Scenary.js";
+import Platform from "./platform.js";
 
 
 class Game {
+    scene;
     engine;
     canvas;
-    scene;
-    maxPlatform = 4;
-    firstLevel;
-    activeCamera;
-
 
     constructor(engine, canvas) {
         this.engine = engine;
         this.canvas = canvas;
-
-        this.player;
-        this.inputMap = {};
     }
 
-    init() {
+    init(){
         this.engine.displayLoadingUI();
-        console.log("Game is initializing...");
         this.createScene().then(() => {
-            this.scene.onKeyboardObservable.add((kbInfo) => {
-                switch (kbInfo.type) {
-                    case KeyboardEventTypes.KEYDOWN:
-                        this.player.inputMap[kbInfo.event.code] = true;
-                        this.inputMap[kbInfo.event.code] = true;
-                        break;
-                    case KeyboardEventTypes.KEYUP:
-                        this.player.inputMap[kbInfo.event.code] = false;
-                        this.player.actions[kbInfo.event.code] = true;
-                        break;
-                    case KeyboardEventTypes.KEYPRESS:
-                        if(this.input)
-                        this.inputMap[kbInfo.event.code] = true;
-                }
-            });
-            this.engine.hideLoadingUI();
+            
         });
-        
+        this.engine.hideLoadingUI();
 
     }
 
-    start() {
+    start(){
         this.engine.runRenderLoop(() => {
-            if(this.activeCamera!= undefined){
-                let delta = this.engine.getDeltaTime() / 1000.0;
-                // delta = 0.016;
-                
-                if(this.inputMap['KeyT']) this.addInspector();
-
-                this.player.platformsList = this.firstLevel.listPlatform;
-                this.player.angleList = this.firstLevel.listAngle;
-
-                this.player.updateMove(delta);
-                // this.player.updateCamera(); 
-                // this.firstLevel.movePlatform(delta);
-
-
-                //this.firstLevel.checkCollisions(this.player);
-
-                this.scene.render();
-            }
-        });
-
-    }
-
-    async sleep(delay) {
-        return new Promise(resolve => {
-            setTimeout(resolve, delay);
+            this.scene.render();
         });
     }
 
-    async createScene() {
-
+    async createScene(){
         this.scene = new Scene(this.engine);
-        this.addLight();
+        this.Scenary = new Scenary();
 
+        //Add light to the scene
+        this.Scenary.addlight(this.scene);
         
+        //Add a camera to the scene to render the scene
+        this.createrCamera();
 
-        /**
-         * Create the player
-         */
-        this.player = new Player("Player 1");
-        this.player.createbody(this.scene).then(()=> {
-            const camera = this.player.createCamera(this.scene);
-            this.activeCamera = camera;
-            this.scene.activeCamera = camera;
-            console.log("Camera created");
-        });
+        //Test platform
+        var platform = new Platform(this.scene, {width: 10, height: 10}, new Vector3(0, 0, 0), "ground", Math.PI/8);
+        await platform.createPlatform();
 
-
-        /**
-         * Add Platform to the game
-         */
-        this.addFirstLevel();
-
-        /**
-         * Create the camera
-        */
-        const camera2 = new FreeCamera("camera", new Vector3(0, 8.5, 8.5), this.scene);
-        camera2.setTarget(Vector3.Zero());
-        camera2.attachControl(this.canvas, true);
-        //this.activeCamera = camera2;
-    
-    }
-
-    addFirstLevel() {
-        //console.log(this.player)
-        this.firstLevel = new FirstLevel(this.scene, 25, 0.5, 10,this.player);
-        this.firstLevel.createStraightLine(this.scene);
-
-        //this.firstLevel.checkCollisions(this.player, this.scene);
-    }
-    
-    addLight(){
-        this.scene.clearColor = new Color3(0.7, 0.7, 0.95);
-        this.scene.ambientColor = new Color3(0.8, 0.8, 1);
-        this.scene.collisionsEnabled = true;
-        this.scene.gravity = new Vector3(0, -0.15, 0);
-        var pipeline = new DefaultRenderingPipeline("default", true, this.scene, [this.camera]);
-
-        pipeline.glowLayerEnabled = true;
-        pipeline.glowLayer.intensity = 0.35;
-        pipeline.glowLayer.blurKernelSize = 16;
-        pipeline.glowLayer.ldrMerge = true;
-        var light = new HemisphericLight("light", new Vector3(0, 1, 0), this.scene);
-
-        // Default intensity is 1. Let's dim the light a small amount
-        light.intensity = 0.7;
+        var platform2 = new Platform(this.scene, {width: 10, height: 10}, new Vector3(0, 0, 10), "ground", 0);
+        await platform2.createPlatform();
 
     }
 
-    addInspector() {
-        this.scene.debugLayer.show();
+    createrCamera(){
+        const freeCamera = new FreeCamera("freeCamera", new Vector3(0, 5, -10), this.scene);
+        freeCamera.setTarget(Vector3.Zero());
+        freeCamera.attachControl(this.canvas, true);
     }
 }
 

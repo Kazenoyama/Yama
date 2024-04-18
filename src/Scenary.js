@@ -1,36 +1,27 @@
-import {MeshBuilder, Scene, SceneLoader, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import {Color3, DefaultRenderingPipeline, HemisphericLight, MeshBuilder, Scene, SceneLoader, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 
 import tree1 from "../assets/models/fur_tree.glb";
 
 class Scenary{
     constructor(){
-        this.tree;
-        this.scaling = 3;
     }
 
-    async LoadTree(scene){
-        this.tree = await SceneLoader.ImportMeshAsync("", "", tree1, scene);
-        this.tree.meshes[0].scaling = new Vector3(this.scaling, this.scaling, this.scaling);
-        this.tree.meshes[0].isVisible = false;
-        this.tree.meshes[0].position.z = 10;
+    addlight(scene){
+        scene.clearColor = new Color3(0.7, 0.7, 0.95);
+        scene.ambientColor = new Color3(0.8, 0.8, 1);
+        scene.collisionsEnabled = true;
+        scene.gravity = new Vector3(0, -0.15, 0);
+        var pipeline = new DefaultRenderingPipeline("default", true, scene, [this.camera]);
+
+        pipeline.glowLayerEnabled = true;
+        pipeline.glowLayer.intensity = 0.35;
+        pipeline.glowLayer.blurKernelSize = 16;
+        pipeline.glowLayer.ldrMerge = true;
+        var light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+        light.intensity = 0.7;
+
+        console.log("light added");
     }
-
-    addTree(platform, dimension,scaling){
-        this.scaling = scaling;
-        const tree = this.tree.meshes[0].clone("tree");
-        tree.position = platform.position.clone();
-        tree.scaling = new Vector3(this.scaling, this.scaling, this.scaling);
-        tree.position.y = platform.position.y;
-        tree.position.z = platform.position.z;
-        if(Math.floor(Math.random() * 2 - 1 ) >=0)
-            tree.position.x = platform.position.x + (dimension.width/2 );
-        else
-            tree.position.x = platform.position.x - (dimension.width/2);
-        tree.isVisible = true;
-        tree.checkCollisions = false;
-    }
-
-
 }
 
 export default Scenary;
